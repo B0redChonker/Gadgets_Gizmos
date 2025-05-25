@@ -11,7 +11,7 @@ import org.b0redchungus.gadgets.GadgetsGizmos;
 public class GPS extends Item {
 
     private static long lastDamageTime = 0;
-    private static final long DAMAGE_INTERVAL = 100;  // 1/4 second (in ticks, 20 ticks = 1 second)
+    private static final long DAMAGE_INTERVAL = 100;  // 5 seconds (in ticks, 20 ticks = 1 second)
 
     public GPS(Settings settings) {
         super(settings);
@@ -25,16 +25,15 @@ public class GPS extends Item {
 
                 if (client.world != null) {
                     long currentTime = client.world.getTime();
-
-                    if (currentTime - lastDamageTime >= DAMAGE_INTERVAL) {
-                        // If the player is holding the GPS, and it isn't broken, update the position
-                        if (currentItem.getItem() == ModItems.GPS_ITEM && currentItem.getDamage() < currentItem.getMaxDamage()) {
-                            updatePosition(player);
+                    // If the player is holding the GPS, and it isn't broken, update the position
+                    if (currentItem.getItem() == ModItems.GPS_ITEM && currentItem.getDamage() < currentItem.getMaxDamage()) {
+                        updatePosition(player);
+                        if (currentTime - lastDamageTime >= DAMAGE_INTERVAL) {
                             damageGPS(currentItem);
-                        } else if (currentItem.getItem() == ModItems.GPS_ITEM && currentItem.getDamage() >= currentItem.getMaxDamage()) {
-                            player.sendMessage(Text.literal("Your GPS is broken. Please repair it.").formatted(Formatting.RED), true);
+                            lastDamageTime = currentTime;
                         }
-                        lastDamageTime = currentTime;
+                    } else if (currentItem.getItem() == ModItems.GPS_ITEM && currentItem.getDamage() >= currentItem.getMaxDamage()) {
+                        player.sendMessage(Text.literal("Your GPS is broken. Please repair it.").formatted(Formatting.RED), true);
                     }
                 }
             }
