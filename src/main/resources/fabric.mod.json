@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "gadgets",
+	"version": "${version}",
+	"name": "Gadgets & Gizmos",
+	"description": "This is my first mod, and it includes cool Gadgets & Gizmos for you to have fun with!",
+	"authors": [
+		"B0redChungus!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/Minecraft_Mod/Gadgets_Gizmos"
+	},
+	"license": "MIT",
+	"icon": "assets/gadgets/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"org.b0redchungus.gadgets.GadgetsGizmos"
+		],
+		"fabric-datagen": [
+			"org.b0redchungus.gadgets.GadgetsGizmosDataGenerator"
+		],
+		"client": [
+			"org.b0redchungus.gadgets.GadgetsGizmosClient"
+		]
+	},
+	"mixins": [
+		"gadgets.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.5",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

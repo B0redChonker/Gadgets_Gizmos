@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "minecraft:copper_ingot",
+    "X": "minecraft:redstone",
+    "Y": "minecraft:quartz",
+    "Z": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    " Y ",
+    "#X#",
+    "#Z#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "gadgets:gps"
+  }
+}

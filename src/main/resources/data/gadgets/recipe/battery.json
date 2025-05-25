@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "minecraft:copper_ingot",
+    "X": "minecraft:redstone",
+    "Y": "minecraft:coal"
+  },
+  "pattern": [
+    " # ",
+    " Y ",
+    " X "
+  ],
+  "result": {
+    "count": 1,
+    "id": "gadgets:battery"
+  }
+}
