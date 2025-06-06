@@ -1,39 +1,41 @@
 package org.b0redchungus.gadgets.item;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.b0redchungus.gadgets.GadgetsGizmos;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class GPS extends Item {
 
     private static long lastDamageTime = 0;
-    private static final long DAMAGE_INTERVAL = 100;  // 5 seconds (in ticks, 20 ticks = 1 second)
+    private static final long DAMAGE_INTERVAL = 200;  // 10 seconds (in ticks, 20 ticks = 1 second)
 
     public GPS(Settings settings) {
         super(settings);
     }
 
     public static void checkPosition() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player != null) {
-                ClientPlayerEntity player = client.player;
-                ItemStack currentItem = player.getMainHandStack();
-
-                if (client.world != null) {
-                    long currentTime = client.world.getTime();
-                    // If the player is holding the GPS, and it isn't broken, update the position
-                    if (currentItem.getItem() == ModItems.GPS_ITEM && currentItem.getDamage() < currentItem.getMaxDamage()) {
-                        updatePosition(player);
-                        if (currentTime - lastDamageTime >= DAMAGE_INTERVAL) {
-                            damageGPS(currentItem);
-                            lastDamageTime = currentTime;
+        ServerTickEvents.END_WORLD_TICK.register(world -> {
+            if (world instanceof ServerWorld) {
+                // Loop through all players on the server
+                for (ServerPlayerEntity player : world.getPlayers()) {
+                    ItemStack currentItem = player.getMainHandStack();
+                    // If the player is holding the GPS, and is not broken, update the position
+                    if (currentItem.getItem() == ModItems.GPS_ITEM) {
+                        if (currentItem.getDamage() < currentItem.getMaxDamage()) {
+                            updatePosition(player);
+                            long currentTime = world.getTime();
+                            if (currentTime - lastDamageTime >= DAMAGE_INTERVAL) {
+                                damageGPS(currentItem);
+                                lastDamageTime = currentTime;
+                            }
+                        } else {
+                            player.sendMessage(Text.literal("Your GPS is broken. Please repair it.").formatted(Formatting.RED), true);
                         }
-                    } else if (currentItem.getItem() == ModItems.GPS_ITEM && currentItem.getDamage() >= currentItem.getMaxDamage()) {
-                        player.sendMessage(Text.literal("Your GPS is broken. Please repair it.").formatted(Formatting.RED), true);
                     }
                 }
             }
@@ -50,7 +52,7 @@ public class GPS extends Item {
         }
     }
 
-    private static void updatePosition(ClientPlayerEntity player) {
+    private static void updatePosition(ServerPlayerEntity player) {
         double x = player.getX();
         double y = player.getY();
         double z = player.getZ();

@@ -1,39 +1,41 @@
 package org.b0redchungus.gadgets.item;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.b0redchungus.gadgets.GadgetsGizmos;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class DigitalWatch extends Item {
 
     private static long lastDamageTime = 0;
-    private static final long DAMAGE_INTERVAL = 100;  // 5 seconds (in ticks, 20 ticks = 1 second)
+    private static final long DAMAGE_INTERVAL = 200;  // 10 seconds (in ticks, 20 ticks = 1 second)
 
     public DigitalWatch(Settings settings) {
-        super(settings);  // super(settings.maxDamage(1000)); // Doesn't change the max damage, always 500.
+        super(settings); // super(settings.maxDamage(1000)); // Doesn't change the max damage, always 500.
     }
 
     public static void checkTime() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player != null) {
-                ClientPlayerEntity player = client.player;
-                ItemStack currentItem = player.getMainHandStack();
+        ServerTickEvents.END_WORLD_TICK.register(world -> {
+            if (world instanceof ServerWorld) {
+                // Loop through all players on the server
+                for (ServerPlayerEntity player : world.getPlayers()) {
+                    ItemStack currentItem = player.getMainHandStack();
 
-                if (client.world != null) {
-                    long currentTime = client.world.getTime();
-                    if (currentItem.getItem() == ModItems.DIGITAL_WATCH && currentItem.getDamage() < currentItem.getMaxDamage()) {
-                        updateTime(client, player);
-                        if (currentTime - lastDamageTime >= DAMAGE_INTERVAL) {
-                            damageWatch(currentItem);
-                            lastDamageTime = currentTime;
+                    if (currentItem.getItem() == ModItems.DIGITAL_WATCH) {
+                        if (currentItem.getDamage() < currentItem.getMaxDamage()) {
+                            updateTime(world, player);
+                            long currentTime = world.getTime();
+                            if (currentTime - lastDamageTime >= DAMAGE_INTERVAL) {
+                                damageWatch(currentItem);
+                                lastDamageTime = currentTime;
+                            }
+                        } else {
+                            player.sendMessage(Text.literal("Your Digital Watch is broken. Please repair it.").formatted(Formatting.RED), true);
                         }
-                    } else if (currentItem.getItem() == ModItems.DIGITAL_WATCH && currentItem.getDamage() >= currentItem.getMaxDamage()) {
-                        player.sendMessage(Text.literal("Your Digital Watch is broken. Please repair it.").formatted(Formatting.RED), true);
                     }
                 }
             }
@@ -50,18 +52,16 @@ public class DigitalWatch extends Item {
         }
     }
 
-    private static void updateTime(MinecraftClient client, ClientPlayerEntity player) {
-        if (client.world != null) {
-            long timeOfDay = client.world.getTimeOfDay();
+    private static void updateTime(ServerWorld world, ServerPlayerEntity player) {
+        long timeOfDay = world.getTimeOfDay();
 
-            int hours = (int) ((timeOfDay / 1000) + 6) % 24;
-            int minutes = (int) ((timeOfDay % 1000) * 60 / 1000);
+        int hours = (int) ((timeOfDay / 1000) + 6) % 24;
+        int minutes = (int) ((timeOfDay % 1000) * 60 / 1000);
 
-            // Format the time as hh:mm
-            String timeText = String.format("%02d:%02d", hours, minutes);
+        // Format the time as hh:mm
+        String timeText = String.format("%02d:%02d", hours, minutes);
 
-            player.sendMessage(Text.literal("Time: " + timeText).formatted(Formatting.GREEN), true);
-            GadgetsGizmos.LOGGER.info("Time was checked with a Digital Watch: {}", timeText);
-        }
+        player.sendMessage(Text.literal("Time: " + timeText).formatted(Formatting.GREEN), true);
+        GadgetsGizmos.LOGGER.info("Time was checked with a Digital Watch: {}", timeText);
     }
 }
