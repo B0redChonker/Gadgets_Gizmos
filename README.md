@@ -12,6 +12,6 @@ The Digital Watch displays in-game time, the GPS displays in-game position of th
 
 ### Known issues
 
-The durability restores itself to a certain amount upon reloading the game and entering some menues.
+None!
 
 ## Have fun! :)
